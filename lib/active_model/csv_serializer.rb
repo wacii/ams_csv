@@ -18,6 +18,7 @@ module ActiveModel
 
     def to_csv
       self.class._attributes.collect do |attribute|
+        next send(attribute) if respond_to?(attribute)
         @object.read_attribute_for_serialization(attribute)
       end.to_csv
     end
