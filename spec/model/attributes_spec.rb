@@ -6,7 +6,7 @@ describe 'attributes' do
     include ActiveModel::Model
     include ActiveModel::Serialization
 
-    attr_accessor :name, :body, :summary
+    attr_accessor :name, :body
   end
 
   class PostSerializer < ActiveModel::CsvSerializer
