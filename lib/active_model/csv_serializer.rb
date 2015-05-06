@@ -44,6 +44,8 @@ module ActiveModel
 
     private
 
+    # TODO: read_attribute vs read_association, extract into methods
+
     def associated(name)
       respond_to?(name) ? send(name) : object.send(name)
     end
