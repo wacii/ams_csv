@@ -6,11 +6,13 @@ module ActiveModel
     class << self
       attr_accessor :_attributes
       attr_accessor :_singular_associations
+      attr_accessor :_has_many_associations
     end
 
     def self.inherited(base)
       base._attributes = []
       base._singular_associations = {}
+      base._has_many_associations = {}
     end
 
     def self.attributes(*attributes)
@@ -22,6 +24,11 @@ module ActiveModel
       @_singular_associations[associated] = serializer
     end
 
+    def self.has_many(associated)
+      serializer = associated.to_s.singularize.classify + 'Serializer'
+      @_has_many_associations[associated] = serializer
+    end
+
     attr_reader :object
 
     def initialize(object)
@@ -29,17 +36,32 @@ module ActiveModel
     end
 
     def to_a
+      # serialize this object
+      # TODO: always use array of records, even with one record
       values = self.class._attributes.collect do |attribute|
         next send(attribute) if respond_to?(attribute)
         @object.read_attribute_for_serialization(attribute)
       end
+      # serialize objects associated through has one relations
       self.class._singular_associations.reduce(values) do |array, (k, v)|
         array.concat(associated_csv(k, v))
+      end
+      # serialize objects associated through has many relationss
+      has_many = self.class._has_many_associations.reduce([]) do |array, (k, v)|
+        array.concat(associated_csv(k, v, values))
+      end
+      return values if has_many.empty?
+      has_many.collect do |record|
+        values + record
       end
     end
 
     def to_csv
-      to_a.to_csv
+      array = to_a
+      return array.to_csv if array.empty? || !array[0].respond_to?(:each)
+      CSV.generate do |csv|
+        array.each { |record| csv << record }
+      end
     end
 
     private
@@ -50,9 +72,14 @@ module ActiveModel
       respond_to?(name) ? send(name) : object.send(name)
     end
 
-    def associated_csv(association_name, serializer_klass)
+    def associated_csv(association_name, serializer_klass, prepend = [])
       return [] unless associated = associated(association_name)
-      serializer_klass.constantize.new(associated).to_a
+      if associated.is_a?(Array)
+        # TODO: each_serializer option
+        ActiveModel::CsvArraySerializer.new(associated).to_a
+      else
+        serializer_klass.constantize.new(associated).to_a
+      end
     end
   end
 end
