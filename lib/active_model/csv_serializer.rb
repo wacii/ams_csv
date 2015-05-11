@@ -38,29 +38,28 @@ module ActiveModel
     def to_a
       # serialize this object
       # TODO: always use array of records, even with one record
-      values = self.class._attributes.collect do |attribute|
+      values = []
+      values << self.class._attributes.collect do |attribute|
         next send(attribute) if respond_to?(attribute)
         @object.read_attribute_for_serialization(attribute)
       end
       # serialize objects associated through has one relations
-      self.class._singular_associations.reduce(values) do |array, (k, v)|
-        array.concat(associated_csv(k, v))
+      self.class._singular_associations.each do |k, v|
+        values[0].concat(associated_csv(k, v))
       end
       # serialize objects associated through has many relationss
       has_many = self.class._has_many_associations.reduce([]) do |array, (k, v)|
-        array.concat(associated_csv(k, v, values))
+        array.concat(associated_csv(k, v))
       end
       return values if has_many.empty?
       has_many.collect do |record|
-        values + record
+        values[0] + record
       end
     end
 
     def to_csv
-      array = to_a
-      return array.to_csv if array.empty? || !array[0].respond_to?(:each)
       CSV.generate do |csv|
-        array.each { |record| csv << record }
+        to_a.each { |record| csv << record }
       end
     end
 
@@ -72,7 +71,7 @@ module ActiveModel
       respond_to?(name) ? send(name) : object.send(name)
     end
 
-    def associated_csv(association_name, serializer_klass, prepend = [])
+    def associated_csv(association_name, serializer_klass)
       return [] unless associated = associated(association_name)
       if associated.is_a?(Array)
         # TODO: each_serializer option
