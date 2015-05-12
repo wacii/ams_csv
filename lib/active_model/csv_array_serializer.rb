@@ -23,7 +23,7 @@ module ActiveModel
 
     def serializer_for(object)
       # TODO: prepend Csv or not, extract this code out
-      "#{object.class.name}CsvSerializer".constantize
+      ActiveModel::CsvSerializerBuilder.for(object.class.name)
     end
   end
 end

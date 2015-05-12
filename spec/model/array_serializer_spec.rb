@@ -45,7 +45,7 @@ describe 'ArraySerializer' do
   end
 
   it 'raises an exception when expected serializer not found' do
-    comments << post
+    comments << Object.new
     array_serializer = ActiveModel::CsvArraySerializer.new(comments)
 
     expect{ array_serializer.to_csv }.to raise_error(NameError)
