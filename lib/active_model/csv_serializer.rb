@@ -39,19 +39,16 @@ module ActiveModel
 
     def to_a
       return [[]] unless @object
-      # serialize this object
-      # TODO: always use array of records, even with one record
+
       values = []
-      values << self.class._attributes.collect do |attribute|
-        next send(attribute) if respond_to?(attribute)
-        @object.read_attribute_for_serialization(attribute)
-      end
-      # associations
+      values << self.class._attributes.collect { |name| read_attribute(name) }
+
       self.class._associations.each do |hash|
-        associated = associated(hash[:association])
+        associated = read_association(hash[:association])
         data = hash[:serializer].new(associated).to_a
         values = values.product(data).collect(&:flatten)
       end
+
       values
     end
 
@@ -63,9 +60,12 @@ module ActiveModel
 
     private
 
-    # TODO: read_attribute vs read_association, extract into methods
+    def read_attribute(name)
+      return send(name) if respond_to?(name)
+      object.read_attribute_for_serialization(name)
+    end
 
-    def associated(name)
+    def read_association(name)
       respond_to?(name) ? send(name) : object.send(name)
     end
   end
