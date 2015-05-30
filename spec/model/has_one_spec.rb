@@ -5,8 +5,8 @@ describe 'has_one' do
   let(:post) { Post.new(name: 'a', body: 'b', author: author) }
   let(:author) { Author.new(name: 'd') }
   let(:category) { Category.new(name: 'e') }
-  let(:post_serializer) { PostSerializer.new(post) }
-  let(:author_serializer) { AuthorSerializer.new(author) }
+  let(:post_serializer) { PostCsvSerializer.new(post) }
+  let(:author_serializer) { AuthorCsvSerializer.new(author) }
 
   class Post
     include ActiveModel::Model
@@ -29,19 +29,19 @@ describe 'has_one' do
     attr_accessor :name
   end
 
-  class PostSerializer < ActiveModel::CsvSerializer
+  class PostCsvSerializer < ActiveModel::CsvSerializer
     attributes :name, :body
     has_one :author
     has_one :category
   end
 
-  class AuthorSerializer < ActiveModel::CsvSerializer
+  class AuthorCsvSerializer < ActiveModel::CsvSerializer
     attributes :name
 
     has_one :category
   end
 
-  class CategorySerializer < ActiveModel::CsvSerializer
+  class CategoryCsvSerializer < ActiveModel::CsvSerializer
     attributes :name
   end
 

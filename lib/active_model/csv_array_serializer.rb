@@ -9,21 +9,15 @@ module ActiveModel
     end
 
     def to_a
+      return ActiveModel::CsvSerializer.new(nil).to_a if @objects.nil?
       @objects.collect do |object|
-        serializer = @each_serializer || serializer_for(object)
+        serializer = @each_serializer || ActiveModel::CsvSerializerBuilder
         serializer.new(object).to_a
       end
     end
 
     def to_csv
       to_a.to_csv
-    end
-
-    private
-
-    def serializer_for(object)
-      # TODO: prepend Csv or not, extract this code out
-      ActiveModel::CsvSerializerBuilder.for(object.class.name)
     end
   end
 end
