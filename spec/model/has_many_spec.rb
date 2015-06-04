@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'active_model'
 
 describe 'has_many' do
   let(:post) { Post.new(name: 'a', body: 'b', comments: comments) }
@@ -10,30 +9,7 @@ describe 'has_many' do
       Comment.new(text: 'e')
     ]
   end
-  let(:serializer) { PostSerializer.new(post) }
-
-  class Post
-    include ActiveModel::Model
-    include ActiveModel::Serialization
-
-    attr_accessor :name, :body, :comments
-  end
-
-  class Comment
-    include ActiveModel::Model
-    include ActiveModel::Serialization
-
-    attr_accessor :text
-  end
-
-  class PostSerializer < ActiveModel::CsvSerializer
-    attributes :name, :body
-    has_many :comments
-  end
-
-  class CommentCsvSerializer < ActiveModel::CsvSerializer
-    attributes :text
-  end
+  let(:serializer) { PostCsvSerializer.new(post) }
 
   it 'appends associated objects csv to multiple copies of this' do
     csv = serializer.to_csv

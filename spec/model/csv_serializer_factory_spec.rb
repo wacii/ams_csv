@@ -1,24 +1,7 @@
 require 'spec_helper'
-require 'active_model'
 
 describe ActiveModel::CsvSerializerFactory do
   let(:post) { Post.new(name: 'a', body: 'b') }
-
-  class Post
-    include ActiveModel::Model
-    include ActiveModel::Serialization
-
-    attr_accessor :name, :body
-  end
-
-  class Photo
-    include ActiveModel::Model
-    include ActiveModel::Serialization
-  end
-
-  class PostCsvSerializer < ActiveModel::CsvSerializer
-    attributes :name, :body
-  end
 
   describe '#new' do
     it 'builds a serializer with type based on singular association' do

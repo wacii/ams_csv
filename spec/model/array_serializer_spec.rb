@@ -1,29 +1,10 @@
 require 'spec_helper'
-require 'active_model'
 
 describe 'ArraySerializer' do
   let(:comments) { [comment_1, comment_2] }
   let(:comment_1) { Comment.new(text: 'a') }
   let(:comment_2) { Comment.new(text: 'b') }
   let(:post) { Post.new(name: 'c', body: 'd') }
-
-  class Post
-    include ActiveModel::Model
-    include ActiveModel::Serialization
-
-    attr_accessor :name, :body
-  end
-
-  class Comment
-    include ActiveModel::Model
-    include ActiveModel::Serialization
-
-    attr_accessor :text
-  end
-
-  class CommentCsvSerializer < ActiveModel::CsvSerializer
-    attributes :text
-  end
 
   it 'renders csv using specified serializer' do
     array_serializer = ActiveModel::CsvArraySerializer.new(

@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'active_model'
 
 describe 'has_one' do
   let(:post) { Post.new(name: 'a', body: 'b', author: author) }
@@ -7,43 +6,6 @@ describe 'has_one' do
   let(:category) { Category.new(name: 'e') }
   let(:post_serializer) { PostCsvSerializer.new(post) }
   let(:author_serializer) { AuthorCsvSerializer.new(author) }
-
-  class Post
-    include ActiveModel::Model
-    include ActiveModel::Serialization
-
-    attr_accessor :name, :body, :author, :category
-  end
-
-  class Author
-    include ActiveModel::Model
-    include ActiveModel::Serialization
-
-    attr_accessor :name, :category
-  end
-
-  class Category
-    include ActiveModel::Model
-    include ActiveModel::Serialization
-
-    attr_accessor :name
-  end
-
-  class PostCsvSerializer < ActiveModel::CsvSerializer
-    attributes :name, :body
-    has_one :author
-    has_one :category
-  end
-
-  class AuthorCsvSerializer < ActiveModel::CsvSerializer
-    attributes :name
-
-    has_one :category
-  end
-
-  class CategoryCsvSerializer < ActiveModel::CsvSerializer
-    attributes :name
-  end
 
   it 'appends the associated objects csv data to this' do
     csv = post_serializer.to_csv
