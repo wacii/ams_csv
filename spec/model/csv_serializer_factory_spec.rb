@@ -1,9 +1,8 @@
 require 'spec_helper'
 require 'active_model'
 
-describe ActiveModel::CsvSerializerBuilder do
+describe ActiveModel::CsvSerializerFactory do
   let(:post) { Post.new(name: 'a', body: 'b') }
-  let(:Builder) { ActiveModel::CsvSerializerBuilder }
 
   class Post
     include ActiveModel::Model
@@ -23,18 +22,18 @@ describe ActiveModel::CsvSerializerBuilder do
 
   describe '#new' do
     it 'builds a serializer with type based on singular association' do
-      serializer = ActiveModel::CsvSerializerBuilder.new(post)
+      serializer = ActiveModel::CsvSerializerFactory.new(post)
       expect(serializer).to be_a(PostCsvSerializer)
     end
 
     it 'builds a serializer with type based on plural association' do
-      serializer = ActiveModel::CsvSerializerBuilder.new(post)
+      serializer = ActiveModel::CsvSerializerFactory.new(post)
       expect(serializer).to be_a(PostCsvSerializer)
     end
 
     it 'raises name error when expected serializer not found' do
       expect do
-        ActiveModel::CsvSerializerBuilder.new(Photo.new)
+        ActiveModel::CsvSerializerFactory.new(Photo.new)
       end.to raise_error(NameError)
     end
   end

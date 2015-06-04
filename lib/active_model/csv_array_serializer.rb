@@ -11,7 +11,7 @@ module ActiveModel
     def to_a
       return ActiveModel::CsvSerializer.new(nil).to_a if @objects.nil?
       @objects.collect do |object|
-        serializer = @each_serializer || ActiveModel::CsvSerializerBuilder
+        serializer = @each_serializer || ActiveModel::CsvSerializerFactory
         serializer.new(object).to_a
       end
     end

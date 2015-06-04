@@ -19,7 +19,7 @@ module ActiveModel
     def self.has_one(associated)
       @_associations << {
         association: associated,
-        serializer: ActiveModel::CsvSerializerBuilder
+        serializer: ActiveModel::CsvSerializerFactory
       }
     end
 
