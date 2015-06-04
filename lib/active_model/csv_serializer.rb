@@ -1,5 +1,4 @@
 require 'csv'
-require 'active_support/inflections'
 
 module ActiveModel
   class CsvSerializer
