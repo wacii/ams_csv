@@ -31,8 +31,9 @@ module ActiveModel
 
     attr_reader :object
 
-    def initialize(object)
+    def initialize(object, options = {})
       @object = object
+      @root = options.fetch(:root, true)
     end
 
     def to_a
@@ -52,7 +53,7 @@ module ActiveModel
 
     def to_csv
       CSV.generate do |csv|
-        csv << self.class._attributes.collect(&:to_s)
+        csv << self.class._attributes.collect(&:to_s) if @root
         to_a.each { |record| csv << record }
       end
     end

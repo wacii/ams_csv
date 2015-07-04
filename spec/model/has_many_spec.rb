@@ -9,18 +9,18 @@ describe 'has_many' do
       Comment.new(text: 'e')
     ]
   end
-  let(:serializer) { PostCsvSerializer.new(post) }
+  let(:serializer) { PostCsvSerializer.new(post, root: false) }
 
   it 'appends associated objects csv to multiple copies of this' do
     csv = serializer.to_csv
     records = csv.split("\n")
-    expect(records.length).to eq(comments.length + 1) # +1 for headers
+    expect(records.length).to eq(comments.length)
     records.each.with_index do |record, i|
       next if i == 0
       expect(record).to include(post.name)
       expect(record).to include(post.body)
 
-      comment = comments[i - 1] # -1 for headers
+      comment = comments[i]
       expect(record).to include(comment.text)
     end
   end
