@@ -52,6 +52,7 @@ module ActiveModel
 
     def to_csv
       CSV.generate do |csv|
+        csv << self.class._attributes.collect(&:to_s)
         to_a.each { |record| csv << record }
       end
     end

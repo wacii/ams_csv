@@ -14,12 +14,13 @@ describe 'has_many' do
   it 'appends associated objects csv to multiple copies of this' do
     csv = serializer.to_csv
     records = csv.split("\n")
-    expect(records.length).to eq(comments.length)
+    expect(records.length).to eq(comments.length + 1) # +1 for headers
     records.each.with_index do |record, i|
+      next if i == 0
       expect(record).to include(post.name)
       expect(record).to include(post.body)
 
-      comment = comments[i]
+      comment = comments[i - 1] # -1 for headers
       expect(record).to include(comment.text)
     end
   end
