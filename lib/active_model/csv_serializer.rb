@@ -3,12 +3,13 @@ require 'csv'
 module ActiveModel
   class CsvSerializer
     class << self
-      attr_accessor :_attributes, :_associations
+      attr_accessor :_attributes, :_associations, :root
     end
 
     def self.inherited(base)
       base._attributes = []
       base._associations = []
+      base.root = true
     end
 
     def self.attributes(*attributes)
@@ -33,7 +34,7 @@ module ActiveModel
 
     def initialize(object, options = {})
       @object = object
-      @root = options.fetch(:root, true)
+      @root = options.fetch(:root, self.class.root)
     end
 
     def to_a

@@ -20,4 +20,28 @@ describe 'headers' do
       expect(csv).to_not include('body')
     end
   end
+
+  context 'when root set to false during class definition' do
+    it 'does not include headers' do
+      post = Post.new(name: 'Samwise', body: 'Hobbit extraordinaire.')
+      PostCsvSerializer.root = false
+      serializer = PostCsvSerializer.new(post, root: false)
+      csv = serializer.to_csv
+
+      expect(csv).to_not include('name')
+      expect(csv).to_not include('body')
+    end
+  end
+
+  context 'when parent serializer root set to false' do
+    it 'does not include headers' do
+      post = Post.new(name: 'Samwise', body: 'Hobbit extraordinaire.')
+      ActiveModel::CsvSerializer.root = false
+      serializer = PostCsvSerializer.new(post, root: false)
+      csv = serializer.to_csv
+
+      expect(csv).to_not include('name')
+      expect(csv).to_not include('body')
+    end
+  end
 end
