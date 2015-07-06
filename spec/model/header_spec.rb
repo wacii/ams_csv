@@ -44,4 +44,16 @@ describe 'headers' do
       expect(csv).to_not include('body')
     end
   end
+
+  context 'when serialized object has one associated object' do
+    it 'renders associated attributes prepended with its name' do
+      category = Category.new(name: 'a')
+      author = Author.new(name: 'b', category: category)
+      serializer = AuthorCsvSerializer.new(author)
+      csv = serializer.to_csv
+
+      expect(csv).to include('name')
+      expect(csv).to include('category_name')
+    end
+  end
 end

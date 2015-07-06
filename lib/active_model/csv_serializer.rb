@@ -54,9 +54,23 @@ module ActiveModel
 
     def to_csv
       CSV.generate do |csv|
-        csv << self.class._attributes.collect(&:to_s) if @root
+        csv << attribute_names if @root
         to_a.each { |record| csv << record }
       end
+    end
+
+    def attribute_names(prefix = '')
+      names = self.class._attributes.collect do |attribute|
+        prefix + attribute.to_s
+      end
+      self.class._associations.each do |hash|
+        associated = read_association(hash[:association])
+        next if associated.nil?
+        next if hash[:serializer].is_a? ActiveModel::CsvArraySerializer # TODO
+        serializer = hash[:serializer].new(associated)
+        names.concat serializer.attribute_names("#{hash[:association]}_")
+      end
+      names
     end
 
     private
