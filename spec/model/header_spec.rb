@@ -56,4 +56,19 @@ describe 'headers' do
       expect(csv).to include('category_name')
     end
   end
+
+  context 'when serialized object has nested associated objects' do
+    it 'renders associated attributes prepended with its objects name' do
+      category = Category.new(name: 'a')
+      author = Author.new(name: 'b', category: category)
+      post = Post.new(name: 'a', body: 'b', author: author)
+      serializer = PostCsvSerializer.new(post)
+      csv = serializer.to_csv
+
+      expect(csv).to include('name')
+      expect(csv).to include('body')
+      expect(csv).to include('author_name')
+      expect(csv).to include('category_name')
+    end
+  end
 end
