@@ -22,9 +22,11 @@ describe 'headers' do
   end
 
   context 'when root set to false during class definition' do
+    before { PostCsvSerializer.root = false }
+    after { PostCsvSerializer.root = true }
+
     it 'does not include headers' do
       post = Post.new(name: 'Samwise', body: 'Hobbit extraordinaire.')
-      PostCsvSerializer.root = false
       serializer = PostCsvSerializer.new(post, root: false)
       csv = serializer.to_csv
 
@@ -34,9 +36,11 @@ describe 'headers' do
   end
 
   context 'when parent serializer root set to false' do
+    before { ActiveModel::CsvSerializer.root = false }
+    after { ActiveModel::CsvSerializer.root = true }
+
     it 'does not include headers' do
       post = Post.new(name: 'Samwise', body: 'Hobbit extraordinaire.')
-      ActiveModel::CsvSerializer.root = false
       serializer = PostCsvSerializer.new(post, root: false)
       csv = serializer.to_csv
 
@@ -69,6 +73,24 @@ describe 'headers' do
       expect(csv).to include('body')
       expect(csv).to include('author_name')
       expect(csv).to include('category_name')
+    end
+  end
+
+  context 'when serialized object has many associated objects' do
+    it 'renders associated attributes prepended with its name' do
+      comments = [
+        Comment.new(text: 'c'),
+        Comment.new(text: 'd'),
+        Comment.new(text: 'e')
+      ]
+      post = Post.new(name: 'a', body: 'b', comments: comments)
+      serializer = PostCsvSerializer.new(post)
+      csv = serializer.to_csv
+
+      expect(csv).to include('name')
+      expect(csv).to include('body')
+      expect(csv).to include('comments_text') # TODO: singular prefix
+      expect(csv.split("\n").length).to eq(4)
     end
   end
 end
