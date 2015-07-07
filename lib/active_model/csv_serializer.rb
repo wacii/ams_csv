@@ -3,12 +3,12 @@ require 'csv'
 module ActiveModel
   class CsvSerializer
     class << self
-      attr_accessor :_attributes, :_associations, :root
+      attr_accessor :_attributes, :associations, :root
     end
 
     def self.inherited(base)
       base._attributes = []
-      base._associations = []
+      base.associations = []
       base.root = true
     end
 
@@ -17,15 +17,15 @@ module ActiveModel
     end
 
     def self.has_one(associated)
-      @_associations << {
-        association: associated,
+      @associations << {
+        associated: associated,
         serializer: ActiveModel::CsvSerializerFactory
       }
     end
 
     def self.has_many(associated)
-      @_associations << {
-        association: associated,
+      @associations << {
+        associated: associated,
         serializer: ActiveModel::CsvArraySerializer
       }
     end
@@ -35,6 +35,7 @@ module ActiveModel
     def initialize(object, options = {})
       @object = object
       @root = options.fetch(:root, self.class.root)
+      @prefix = options.fetch(:prefix, '')
     end
 
     def to_a
@@ -43,10 +44,8 @@ module ActiveModel
       values = []
       values << self.class._attributes.collect { |name| read_attribute(name) }
 
-      self.class._associations.each do |hash|
-        associated = read_association(hash[:association])
-        data = hash[:serializer].new(associated).to_a
-        values = values.product(data).collect(&:flatten)
+      associated_serializers.each do |serializer|
+        values = values.product(serializer.to_a).collect(&:flatten)
       end
 
       values
@@ -59,18 +58,16 @@ module ActiveModel
       end
     end
 
-    def attribute_names(prefix = '')
+    def attribute_names
+      # TODO: null object returned for associations not playing nicely here
+      #   review use of inherited hook, likely why _attributes is nil
+      return [] unless @object
       names = self.class._attributes.collect do |attribute|
-        prefix + attribute.to_s
+        @prefix + attribute.to_s
       end
-      self.class._associations.each do |hash|
-        associated = read_association(hash[:association])
-        next if associated.nil?
-        next if hash[:serializer].is_a? ActiveModel::CsvArraySerializer # TODO
-        serializer = hash[:serializer].new(associated)
-        names.concat serializer.attribute_names("#{hash[:association]}_")
+      associated_serializers.reduce(names) do |names, serializer|
+        names.concat serializer.attribute_names
       end
-      names
     end
 
     private
@@ -82,6 +79,13 @@ module ActiveModel
 
     def read_association(name)
       respond_to?(name) ? send(name) : object.send(name)
+    end
+
+    def associated_serializers
+      @associated_serializers ||= self.class.associations.collect do |hash|
+        object = read_attribute(hash[:associated])
+        hash[:serializer].new(object, prefix: hash[:associated].to_s + '_')
+      end
     end
   end
 end

@@ -6,18 +6,25 @@ module ActiveModel
     def initialize(objects, options = {})
       @each_serializer = options[:each_serializer]
       @objects = objects
+      @options = options
     end
 
     def to_a
       return ActiveModel::CsvSerializer.new(nil).to_a if @objects.nil?
       @objects.collect do |object|
         serializer = @each_serializer || ActiveModel::CsvSerializerFactory
-        serializer.new(object).to_a
+        serializer.new(object, @options).to_a
       end
     end
 
     def to_csv
       to_a.to_csv
+    end
+
+    def attribute_names
+      return [] unless @objects
+      serializer = @each_serializer || ActiveModel::CsvSerializerFactory
+      serializer.new(@objects.first, @options).attribute_names
     end
   end
 end
