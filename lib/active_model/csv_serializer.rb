@@ -2,6 +2,10 @@ require 'csv'
 
 module ActiveModel
   class CsvSerializer
+    @_attributes = []
+    @associations = []
+    @root = true
+
     class << self
       attr_accessor :_attributes, :associations, :root
     end
@@ -59,9 +63,6 @@ module ActiveModel
     end
 
     def attribute_names
-      # TODO: null object returned for associations not playing nicely here
-      #   review use of inherited hook, likely why _attributes is nil
-      return [] unless @object
       names = self.class._attributes.collect do |attribute|
         @prefix + attribute.to_s
       end
