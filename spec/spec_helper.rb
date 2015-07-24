@@ -1,6 +1,17 @@
-require 'active_model_csv_serializers'
-require 'active_model'
+require 'rails'
+require 'action_controller'
+require 'action_controller/railtie'
+require 'rspec/rails'
 require 'pry'
+
+require 'active_model'
+require 'active_model_csv_serializers'
+
+class DummyApp < Rails::Application
+  config.eager_load = false
+  config.secret_key_base = 'abc123'
+end
+DummyApp.initialize!
 
 Dir[File.join(File.dirname(__FILE__), 'support/**/*.rb')].each {|f| require f}
 
